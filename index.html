@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Kooply Bird - Local Edition</title>
+    <title>Kooply Bird</title>
     <link href="https://fonts.cdnfonts.com/css/04b-19" rel="stylesheet">
     <style>
         :root {
             --sky: #70c5ce;
             --pipe: #73bf2e;
+            --building-color: #4ca3ab;
             --fb-font: '04b_19', sans-serif; 
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,13 +28,34 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center; z-index: 20;
         }
-        .logo-box { display: flex; margin-bottom: 150px; transform: translateY(-50px); }
-        .letter {
-            font-size: 3.8rem; display: inline-block;
-            animation: bounceLetter 0.6s infinite alternate; letter-spacing: 2px;
-            text-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0px 7px 0 #000;
+        
+        /* Positioned slightly above center and below clouds */
+        .logo-box { 
+            display: flex; 
+            justify-content: center; 
+            gap: 4px; 
+            position: absolute;
+            top: 22%; /* Center se thora upar */
+            width: 100%; 
         }
-        @keyframes bounceLetter { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+
+        .tap-msg {
+            position: absolute;
+            top: 55%; /* Logo ke niche tap message */
+            color: white; 
+            font-size: 1.6rem; 
+            text-shadow: 3px 3px 0 #000; 
+            cursor: pointer;
+        }
+
+        .letter {
+            font-size: 2.8rem; display: inline-block;
+            animation: bounceLetter 0.6s infinite alternate;
+            text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0px 5px 0 #000;
+        }
+        
+        @keyframes bounceLetter { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+        
         #score-text {
             position: absolute; top: 10%; width: 100%;
             text-align: center; font-size: 5.5rem; color: white; z-index: 10; pointer-events: none;
@@ -57,10 +79,12 @@
 
 <div id="game-container">
     <div id="score-text" class="hidden">0</div>
+    
     <div id="start-screen" class="overlay" onclick="startGame()">
         <div class="logo-box" id="kooply-logo"></div>
-        <p style="color: white; margin-top: 10px; font-size: 1.8rem; text-shadow: 3px 3px 0 #000; cursor: pointer;">TAP TO START</p>
+        <p class="tap-msg">TAP TO FLY</p>
     </div>
+
     <div id="end-screen" class="overlay hidden">
         <div class="panel">
             <h2>GAME OVER</h2>
@@ -71,6 +95,7 @@
             <button class="ok-btn" onclick="resetToMenu()">OK</button>
         </div>
     </div>
+    
     <canvas id="gameCanvas"></canvas>
 </div>
 
@@ -79,27 +104,25 @@
     const ctx = canvas.getContext('2d');
     const scoreHud = document.getElementById('score-text');
 
-    // --- LOCAL SOUND FILES ---
-    // Make sure these files are in the same folder as this HTML file
     const sndWing = new Audio('wing.mp3'); 
     const sndPoint = new Audio('point.mp3'); 
     const sndHit = new Audio('die.mp3'); 
 
-    // Sound Helper with Error Catching
     function playSnd(audio) {
         audio.currentTime = 0;
-        audio.play().catch(e => console.log("Sound error: Click screen first or check file names."));
+        audio.play().catch(e => {});
     }
 
     let bird, pipes, frame, score, gameActive = false, isReady = true;
     let highScore = localStorage.getItem('kooply-high') || 0;
+    let pipeWidth = 80;
 
-    const letters = "KOOPLYBIRD";
-    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3', '#33FFF3', '#FFA500', '#ADFF2F', '#FFD700', '#FFFFFF'];
+    const fullTitle = "KOOPLYBIRD";
+    const colors = ['#FF5252', '#FFEB3B', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#00BCD4', '#F44336', '#FFC107', '#8BC34A'];
     const logoDiv = document.getElementById('kooply-logo');
-    letters.split('').forEach((l, i) => {
-        const s = document.createElement('span');
-        s.innerText = l; s.className = 'letter';
+
+    fullTitle.split('').forEach((l, i) => {
+        const s = document.createElement('span'); s.innerText = l; s.className = 'letter';
         s.style.color = colors[i % colors.length];
         s.style.animationDelay = (i * 0.1) + 's';
         logoDiv.appendChild(s);
@@ -133,25 +156,27 @@
         scoreHud.classList.remove('hidden');
         scoreHud.innerText = "0";
         bird.v = bird.j;
-        playSnd(sndWing); // First jump sound
+        playSnd(sndWing);
     }
 
     function drawScenery() {
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
         for(let i=0; i<3; i++) {
-            let x = (frame * 0.5 + i * 250) % (canvas.width + 100) - 50;
-            ctx.beginPath(); ctx.arc(x, 80, 25, 0, Math.PI*2); ctx.arc(x+20, 70, 35, 0, Math.PI*2); ctx.arc(x+45, 80, 25, 0, Math.PI*2); ctx.fill();
+            let x = (frame * 0.5 + i * 250) % (canvas.width + 200) - 100;
+            ctx.beginPath(); ctx.arc(x, 80, 20, 0, Math.PI*2); ctx.arc(x+15, 70, 25, 0, Math.PI*2); ctx.arc(x+35, 80, 20, 0, Math.PI*2); ctx.fill();
         }
         ctx.fillStyle = "#4ca3ab";
-        for(let i=0; i<12; i++) {
-            let bx = (i * 65) - (frame % 65);
-            let bh = 130 + Math.sin(i * 2) * 40;
-            ctx.fillRect(bx, canvas.height - bh - 20, 55, bh);
+        let scroll = (frame * 1.5) % canvas.width;
+        function drawCity(offset) {
+            let x = offset - scroll;
+            let ground = canvas.height - 20;
+            ctx.beginPath(); ctx.moveTo(x, ground); ctx.lineTo(x, ground - 100); ctx.lineTo(x + 40, ground - 100); ctx.lineTo(x + 40, ground - 140); ctx.lineTo(x + 80, ground - 140); ctx.lineTo(x + 80, ground - 80); ctx.lineTo(x + 130, ground - 80); ctx.lineTo(x + 130, ground - 160); ctx.lineTo(x + 180, ground - 160); ctx.lineTo(x + 180, ground - 90); ctx.lineTo(x + 230, ground - 90); ctx.lineTo(x + 230, ground - 130); ctx.lineTo(x + 300, ground - 130); ctx.lineTo(x + 300, ground - 70); ctx.lineTo(x + 380, ground - 70); ctx.lineTo(x + 380, ground - 150); ctx.lineTo(x + 450, ground - 150); ctx.lineTo(x + 450, ground); ctx.closePath(); ctx.fill();
         }
+        drawCity(0); drawCity(canvas.width);
     }
 
     function drawBird() {
-        if (!gameActive) return;
+        if (!gameActive) return; 
         ctx.save(); 
         ctx.translate(bird.x, bird.y);
         ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/4, bird.v * 0.1)));
@@ -169,29 +194,22 @@
         bird.y += bird.v;
         if (frame % 100 === 0) {
             let gap = 190; 
-            let top = Math.random() * (canvas.height - gap - 200) + 100;
+            let top = Math.random() * (canvas.height - gap - 250) + 100;
             pipes.push({ x: canvas.width, t: top, b: canvas.height - top - gap, p: false });
         }
         pipes.forEach((p, i) => {
             p.x -= 3;
-            if (bird.x + 15 > p.x && bird.x - 15 < p.x + 60) {
+            if (bird.x + 15 > p.x && bird.x - 15 < p.x + pipeWidth) {
                 if (bird.y - 10 < p.t || bird.y + 10 > canvas.height - p.b) {
-                    playSnd(sndHit); 
-                    endGame();
+                    playSnd(sndHit); endGame();
                 }
             }
-            if (!p.p && bird.x > p.x + 60) { 
-                score++; 
-                p.p = true; 
-                scoreHud.innerText = score; 
-                playSnd(sndPoint); 
+            if (!p.p && bird.x > p.x + pipeWidth) { 
+                score++; p.p = true; scoreHud.innerText = score; playSnd(sndPoint); 
             }
-            if (p.x < -70) pipes.splice(i, 1);
+            if (p.x < -pipeWidth) pipes.splice(i, 1);
         });
-        if (bird.y > canvas.height || bird.y < 0) { 
-            playSnd(sndHit); 
-            endGame(); 
-        }
+        if (bird.y > canvas.height - 20 || bird.y < 0) { playSnd(sndHit); endGame(); }
         frame++;
     }
 
@@ -208,29 +226,21 @@
         drawScenery();
         pipes.forEach(p => {
             ctx.fillStyle = "#73bf2e"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-            ctx.fillRect(p.x, 0, 60, p.t); ctx.strokeRect(p.x, 0, 60, p.t);
-            ctx.fillRect(p.x, canvas.height - p.b, 60, p.b); ctx.strokeRect(p.x, canvas.height - p.b, 60, p.b);
+            ctx.fillRect(p.x, 0, pipeWidth, p.t); ctx.strokeRect(p.x, 0, pipeWidth, p.t);
+            ctx.fillRect(p.x, canvas.height - p.b, pipeWidth, p.b); ctx.strokeRect(p.x, canvas.height - p.b, pipeWidth, p.b);
         });
         ctx.fillStyle = "#ded895"; ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+        ctx.strokeStyle = "#000"; ctx.strokeRect(0, canvas.height - 20, canvas.width, 1);
         drawBird();
         if(isReady) frame++;
     }
 
     const control = (e) => { 
         if(isReady) startGame();
-        else if(gameActive) { 
-            bird.v = bird.j; 
-            playSnd(sndWing); 
-        }
+        else if(gameActive) { bird.v = bird.j; playSnd(sndWing); }
     };
-    
     window.onmousedown = control;
-    window.ontouchstart = (e) => { 
-        if(e.target.tagName !== 'BUTTON') { 
-            e.preventDefault(); 
-            control(); 
-        } 
-    };
+    window.ontouchstart = (e) => { if(e.target.tagName !== 'BUTTON') { e.preventDefault(); control(); } };
 
     init();
     function loop() { update(); draw(); requestAnimationFrame(loop); }

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Kooply Bird - Intro</title>
+    <link href="https://fonts.cdnfonts.com/css/04b-19" rel="stylesheet">
+    <style>
+        :root { --sky: #70c5ce; --building-color: #4ca3ab; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: '04b_19', sans-serif; }
+        #wrapper { width: 100%; height: 100%; max-width: 480px; position: relative; overflow: hidden; }
+
+        /* HMAH STUDIOS Intro */
+        #studio-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; animation: fadeOut 0.8s ease-in forwards 3.5s; }
+        .hmah-logo { color: #fff; font-size: 4.5rem; letter-spacing: 12px; opacity: 0; animation: zoomIn 1.2s ease-out forwards 0.5s; }
+        .divider { width: 0; height: 2px; background: #fff; margin: 15px 0; opacity: 0.5; animation: growLine 0.8s ease-in-out forwards 1.3s; }
+        .studios-tag { color: #fff; font-size: 1.2rem; letter-spacing: 10px; opacity: 0; animation: fadeIn 0.8s forwards 1.8s; }
+
+        /* LOADING SCREEN */
+        #loading-screen { position: absolute; inset: 0; background: var(--sky); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
+        
+        /* Game Style Clouds */
+        .cloud-group { position: absolute; width: 100px; height: 50px; opacity: 0.9; animation: float 12s linear infinite; }
+        .cloud-part { position: absolute; background: white; border-radius: 50%; }
+        
+        .title-box { display: flex; gap: 4px; margin-bottom: 50px; z-index: 10; }
+        .letter { font-size: 2.8rem; text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 5px 0 #000; animation: letterBounce 0.5s infinite alternate; }
+
+        .loader-wrap { width: 75%; height: 30px; background: #fff; border: 4px solid #000; border-radius: 10px; padding: 4px; z-index: 10; }
+        .progress-bar { width: 0%; height: 100%; background: #73bf2e; border-radius: 4px; transition: width 0.2s; }
+        
+        .building-layer { position: absolute; bottom: 0; width: 100%; height: 140px; background: var(--building-color); clip-path: polygon(0% 100%, 0% 50%, 8% 50%, 8% 30%, 18% 30%, 18% 60%, 28% 60%, 28% 20%, 42% 20%, 42% 50%, 52% 50%, 52% 35%, 68% 35%, 68% 70%, 82% 70%, 82% 25%, 100% 25%, 100% 100%); z-index: 2; }
+
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes growLine { to { width: 70%; } }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        @keyframes letterBounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+        @keyframes float { from { left: -150px; } to { left: 110%; } }
+    </style>
+</head>
+<body>
+
+    <div id="wrapper">
+        <div id="studio-screen">
+            <div class="hmah-logo">HMAH</div>
+            <div class="divider"></div>
+            <div class="studios-tag">STUDIOS</div>
+        </div>
+
+        <div id="loading-screen">
+            <div class="cloud-group" style="top:15%; animation-delay: -2s;">
+                <div class="cloud-part" style="width:40px; height:40px; left:0; top:10px;"></div>
+                <div class="cloud-part" style="width:50px; height:50px; left:15px; top:0;"></div>
+                <div class="cloud-part" style="width:40px; height:40px; left:35px; top:10px;"></div>
+            </div>
+            
+            <div class="cloud-group" style="top:30%; animation-duration:18s; animation-delay: -10s;">
+                <div class="cloud-part" style="width:40px; height:40px; left:0; top:10px;"></div>
+                <div class="cloud-part" style="width:50px; height:50px; left:15px; top:0;"></div>
+                <div class="cloud-part" style="width:40px; height:40px; left:35px; top:10px;"></div>
+            </div>
+
+            <div class="title-box" id="load-logo"></div>
+
+            <div class="loader-wrap">
+                <div class="progress-bar" id="bar"></div>
+            </div>
+            <p id="msg" style="color:white; margin-top:12px; text-shadow:2px 2px #000; z-index:10;">LOADING...</p>
+            <div class="building-layer"></div>
+        </div>
+    </div>
+
+    <script>
+        const studio = document.getElementById('studio-screen');
+        const loader = document.getElementById('loading-screen');
+        const bar = document.getElementById('bar');
+        const msg = document.getElementById('msg');
+        
+        // Logo setup
+        const titleText = "KOOPLYBIRD";
+        const colors = ['#FF5252', '#FFEB3B', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#00BCD4', '#F44336', '#FFC107', '#8BC34A'];
+        const logoDiv = document.getElementById('load-logo');
+        titleText.split('').forEach((l, i) => {
+            const s = document.createElement('span'); s.innerText = l; s.className = 'letter';
+            s.style.color = colors[i % colors.length]; s.style.animationDelay = (i * 0.1) + 's';
+            logoDiv.appendChild(s);
+        });
+
+        setTimeout(() => {
+            studio.style.display = 'none';
+            loader.style.display = 'flex';
+            startLoading();
+        }, 4300);
+
+        function startLoading() {
+            let width = 0;
+            const interval = setInterval(() => {
+                width += Math.random() * 12;
+                if (width >= 100) {
+                    width = 100;
+                    clearInterval(interval);
+                    msg.innerText = "READY!";
+                    setTimeout(() => { window.location.href = "index.html"; }, 800);
+                } else {
+                    bar.style.width = width + "%";
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
