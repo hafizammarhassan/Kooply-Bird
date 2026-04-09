@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Kooply Bird</title>
+    <title>Kooply Bird - Official</title>
     <link href="https://fonts.cdnfonts.com/css/04b-19" rel="stylesheet">
     <style>
         :root {
@@ -18,126 +18,232 @@
             display: flex; justify-content: center; align-items: center;
             overflow: hidden; font-family: var(--fb-font);
         }
-        #game-container {
-            position: relative; width: 100%; height: 100%;
-            max-width: 500px; background: var(--sky); overflow: hidden;
+
+        #master-container {
+            width: 100%; height: 100%;
+            max-width: 500px; position: relative;
+            background: #000; overflow: hidden;
         }
-        canvas { display: block; width: 100%; height: 100%; }
-        .overlay {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 20;
+
+        /* --- SECTION 1: HMAH STUDIOS INTRO --- */
+        #studio-screen {
+            position: absolute; inset: 0; background: #000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .hmah-logo { color: #fff; font-size: 4.5rem; letter-spacing: 12px; opacity: 0; animation: zoomIn 1.2s ease-out forwards 0.5s; }
+        .divider { width: 0; height: 2px; background: #fff; margin: 15px 0; opacity: 0.5; animation: growLine 0.8s ease-in-out forwards 1.3s; }
+        .studios-tag { color: #fff; font-size: 1.2rem; letter-spacing: 10px; opacity: 0; animation: fadeIn 0.8s forwards 1.8s; }
+
+        /* --- SECTION 2: LOADING SCREEN --- */
+        #loading-screen {
+            position: absolute; inset: 0; background: var(--sky);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 50;
         }
         
-        /* Positioned slightly above center and below clouds */
-        .logo-box { 
-            display: flex; 
-            justify-content: center; 
-            gap: 4px; 
-            position: absolute;
-            top: 22%; /* Center se thora upar */
-            width: 100%; 
-        }
+        /* Two Static Clouds for Loading */
+        .static-cloud { position: absolute; opacity: 0.8; }
+        .cloud-part { position: absolute; background: white; border-radius: 50%; }
+        
+        .loading-logo-box { display: flex; gap: 4px; margin-bottom: 30px; z-index: 10; }
 
-        .tap-msg {
-            position: absolute;
-            top: 55%; /* Logo ke niche tap message */
-            color: white; 
-            font-size: 1.6rem; 
-            text-shadow: 3px 3px 0 #000; 
-            cursor: pointer;
-        }
+        .loader-wrap { width: 75%; height: 30px; background: #fff; border: 4px solid #000; border-radius: 10px; padding: 4px; z-index: 10; }
+        .progress-bar { width: 0%; height: 100%; background: var(--pipe); border-radius: 4px; transition: width 0.2s; }
 
+        /* --- SECTION 3: MAIN GAME --- */
+        #game-screen { position: absolute; inset: 0; background: var(--sky); display: none; z-index: 10; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; }
+        .logo-box { display: flex; justify-content: center; gap: 4px; position: absolute; top: 22%; width: 100%; }
+        .tap-msg { position: absolute; top: 55%; color: white; font-size: 1.6rem; text-shadow: 3px 3px 0 #000; cursor: pointer; }
+        
         .letter {
             font-size: 2.8rem; display: inline-block;
             animation: bounceLetter 0.6s infinite alternate;
             text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0px 5px 0 #000;
         }
-        
-        @keyframes bounceLetter { from { transform: translateY(0); } to { transform: translateY(-12px); } }
-        
+
         #score-text {
-            position: absolute; top: 10%; width: 100%;
-            text-align: center; font-size: 5.5rem; color: white; z-index: 10; pointer-events: none;
+            position: absolute; top: 10%; width: 100%; text-align: center; font-size: 5.5rem; 
+            color: white; z-index: 30; pointer-events: none;
             text-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0px 6px 0 #000;
         }
-        .panel {
-            background: #ded895; border: 5px solid #543847;
-            padding: 20px; width: 70%; border-radius: 10px;
-            text-align: center; box-shadow: 0 10px 0 #000;
+
+        /* --- PROFESSIONAL GAME OVER PANEL --- */
+        .panel { 
+            background: rgba(222, 216, 149, 0.95); 
+            backdrop-filter: blur(5px);
+            border: 6px solid #543847; 
+            padding: 30px 20px; width: 85%; border-radius: 20px; 
+            text-align: center; box-shadow: 0 15px 0 rgba(0,0,0,0.4);
+            animation: panelUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .panel h2 { color: #e67e22; font-size: 3rem; margin-bottom: 20px; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
-        .ok-btn {
-            margin-top: 20px; padding: 10px 40px;
-            background: #73bf2e; color: white; border: 4px solid #fff; font-size: 1.8rem;
-            font-family: var(--fb-font); cursor: pointer; box-shadow: 0 6px 0 #558022;
+        .panel h2 { 
+            color: #f39c12; font-size: 3.2rem; margin-bottom: 20px; 
+            text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 5px 10px rgba(0,0,0,0.5);
         }
+        .stat-container {
+            display: flex; justify-content: space-around; 
+            background: rgba(0,0,0,0.15); padding: 20px 10px; 
+            border-radius: 12px; border: 2px inset rgba(255,255,255,0.3);
+        }
+        .stat-label { color: #543847; font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+        .stat-value { 
+            color: #fff; font-size: 3.8rem; line-height: 1;
+            text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 4px 5px rgba(0,0,0,0.8);
+        }
+        
+        .ok-btn { 
+            margin-top: 30px; padding: 15px 60px; 
+            background: #73bf2e; color: white; border: 4px solid #fff; 
+            font-size: 2.2rem; font-family: var(--fb-font); cursor: pointer; 
+            border-radius: 10px;
+            box-shadow: 0 8px 0 #4a7a1d; transition: all 0.1s;
+        }
+        .ok-btn:hover { background: #82d634; }
+        .ok-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #4a7a1d; }
+
+        .building-layer { position: absolute; bottom: 0; width: 100%; height: 140px; background: var(--building-color); clip-path: polygon(0% 100%, 0% 50%, 8% 50%, 8% 30%, 18% 30%, 18% 60%, 28% 60%, 28% 20%, 42% 20%, 42% 50%, 52% 50%, 52% 35%, 68% 35%, 68% 70%, 82% 70%, 82% 25%, 100% 25%, 100% 100%); }
         .hidden { display: none !important; }
+
+        /* Animations */
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes growLine { to { width: 70%; } }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes bounceLetter { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+        @keyframes panelUp { from { transform: translateY(200px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="score-text" class="hidden">0</div>
-    
-    <div id="start-screen" class="overlay" onclick="startGame()">
-        <div class="logo-box" id="kooply-logo"></div>
-        <p class="tap-msg">TAP TO FLY</p>
+<div id="master-container">
+    <div id="studio-screen">
+        <div class="hmah-logo">HMAH</div>
+        <div class="divider"></div>
+        <div class="studios-tag">STUDIOS</div>
     </div>
 
-    <div id="end-screen" class="overlay hidden">
-        <div class="panel">
-            <h2>GAME OVER</h2>
-            <div style="display: flex; justify-content: space-around; font-weight: bold; color: #543847;">
-                <div>SCORE<br><span id="curr-score" style="font-size: 2.5rem;">0</span></div>
-                <div>BEST<br><span id="best-score" style="font-size: 2.5rem;">0</span></div>
-            </div>
-            <button class="ok-btn" onclick="resetToMenu()">OK</button>
+    <div id="loading-screen">
+        <div class="static-cloud" style="top:12%; left:15%;">
+            <div class="cloud-part" style="width:45px; height:45px; left:0; top:12px;"></div>
+            <div class="cloud-part" style="width:55px; height:55px; left:18px; top:0;"></div>
+            <div class="cloud-part" style="width:45px; height:45px; left:40px; top:12px;"></div>
         </div>
+        <div class="static-cloud" style="top:25%; right:10%;">
+            <div class="cloud-part" style="width:40px; height:40px; left:0; top:10px;"></div>
+            <div class="cloud-part" style="width:50px; height:50px; left:15px; top:0;"></div>
+            <div class="cloud-part" style="width:40px; height:40px; left:35px; top:10px;"></div>
+        </div>
+        
+        <div class="loading-logo-box" id="load-logo"></div>
+
+        <div class="loader-wrap"><div class="progress-bar" id="load-bar"></div></div>
+        <p id="load-msg" style="color:white; margin-top:10px; text-shadow:2px 2px #000; z-index:10;">INITIALIZING...</p>
+        <div class="building-layer"></div>
     </div>
-    
-    <canvas id="gameCanvas"></canvas>
+
+    <div id="game-screen">
+        <div id="score-text" class="hidden">0</div>
+        <div id="start-screen" class="overlay" onclick="startGame()">
+            <div class="logo-box" id="main-logo"></div>
+            <p class="tap-msg">READY TO FLY?</p>
+        </div>
+        <div id="end-screen" class="overlay hidden">
+            <div class="panel">
+                <h2>GAME OVER</h2>
+                <div class="stat-container">
+                    <div>
+                        <div class="stat-label">SCORE</div>
+                        <div id="curr-score" class="stat-value">0</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">BEST</div>
+                        <div id="best-score" class="stat-value">0</div>
+                    </div>
+                </div>
+                <button class="ok-btn" onclick="resetToMenu()">PLAY AGAIN</button>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
 </div>
 
 <script>
+    const studio = document.getElementById('studio-screen');
+    const loading = document.getElementById('loading-screen');
+    const game = document.getElementById('game-screen');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const loadBar = document.getElementById('load-bar');
+    const loadMsg = document.getElementById('load-msg');
     const scoreHud = document.getElementById('score-text');
 
+    // Dummy sounds logic (Add files if needed)
     const sndWing = new Audio('wing.mp3'); 
     const sndPoint = new Audio('point.mp3'); 
     const sndHit = new Audio('die.mp3'); 
 
-    function playSnd(audio) {
-        audio.currentTime = 0;
-        audio.play().catch(e => {});
+    function playSnd(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); }
+
+    let bird, pipes, frame = 0, score = 0, gameActive = false, isReady = true;
+    let highScore = localStorage.getItem('kooply-high') || 0;
+    let pipeWidth = 85;
+
+    const title = "KOOPLYBIRD";
+    const colors = ['#FF5252', '#FFEB3B', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#00BCD4', '#F44336', '#FFC107', '#8BC34A'];
+    
+    function createLogo(containerId) {
+        const container = document.getElementById(containerId);
+        title.split('').forEach((l, i) => {
+            const s = document.createElement('span'); s.innerText = l; s.className = 'letter';
+            s.style.color = colors[i % colors.length]; s.style.animationDelay = (i * 0.1) + 's';
+            container.appendChild(s);
+        });
     }
 
-    let bird, pipes, frame, score, gameActive = false, isReady = true;
-    let highScore = localStorage.getItem('kooply-high') || 0;
-    let pipeWidth = 80;
+    createLogo('load-logo');
+    createLogo('main-logo');
 
-    const fullTitle = "KOOPLYBIRD";
-    const colors = ['#FF5252', '#FFEB3B', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#00BCD4', '#F44336', '#FFC107', '#8BC34A'];
-    const logoDiv = document.getElementById('kooply-logo');
-
-    fullTitle.split('').forEach((l, i) => {
-        const s = document.createElement('span'); s.innerText = l; s.className = 'letter';
-        s.style.color = colors[i % colors.length];
-        s.style.animationDelay = (i * 0.1) + 's';
-        logoDiv.appendChild(s);
-    });
+    // Intro/Loading Cycle
+    setTimeout(() => {
+        studio.style.display = 'none';
+        loading.style.display = 'flex';
+        let width = 0;
+        let interval = setInterval(() => {
+            width += Math.random() * 8;
+            if (width >= 100) {
+                width = 100; clearInterval(interval);
+                loadMsg.innerText = "READY!";
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    game.style.display = 'block';
+                    resize(); init(); loop();
+                }, 800);
+            }
+            loadBar.style.width = width + "%";
+        }, 120);
+    }, 4000);
 
     function resize() {
-        const container = document.getElementById('game-container');
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
+        canvas.width = game.clientWidth;
+        canvas.height = game.clientHeight;
     }
-    window.onresize = resize; resize();
 
     function init() {
-        bird = { x: canvas.width * 0.25, y: canvas.height * 0.5, v: 0, g: 0.25, j: -5.2 };
+        bird = { x: canvas.width * 0.25, y: canvas.height * 0.5, v: 0, g: 0.26, j: -5.5 };
         pipes = []; frame = 0; score = 0;
+    }
+
+    function startGame() {
+        if(!isReady) return;
+        isReady = false; gameActive = true;
+        document.getElementById('start-screen').classList.add('hidden');
+        scoreHud.classList.remove('hidden');
+        scoreHud.innerText = "0";
+        bird.v = bird.j; playSnd(sndWing);
     }
 
     function resetToMenu() {
@@ -148,65 +254,47 @@
         init();
     }
 
-    function startGame() {
-        if(!isReady) return;
-        isReady = false; 
-        gameActive = true;
-        document.getElementById('start-screen').classList.add('hidden');
-        scoreHud.classList.remove('hidden');
-        scoreHud.innerText = "0";
-        bird.v = bird.j;
-        playSnd(sndWing);
-    }
-
     function drawScenery() {
         ctx.fillStyle = "rgba(255,255,255,0.9)";
+        // Moving clouds in game
         for(let i=0; i<3; i++) {
-            let x = (frame * 0.5 + i * 250) % (canvas.width + 200) - 100;
+            let x = (frame * 0.5 + i * 280) % (canvas.width + 200) - 150;
             ctx.beginPath(); ctx.arc(x, 80, 20, 0, Math.PI*2); ctx.arc(x+15, 70, 25, 0, Math.PI*2); ctx.arc(x+35, 80, 20, 0, Math.PI*2); ctx.fill();
         }
         ctx.fillStyle = "#4ca3ab";
         let scroll = (frame * 1.5) % canvas.width;
         function drawCity(offset) {
-            let x = offset - scroll;
-            let ground = canvas.height - 20;
-            ctx.beginPath(); ctx.moveTo(x, ground); ctx.lineTo(x, ground - 100); ctx.lineTo(x + 40, ground - 100); ctx.lineTo(x + 40, ground - 140); ctx.lineTo(x + 80, ground - 140); ctx.lineTo(x + 80, ground - 80); ctx.lineTo(x + 130, ground - 80); ctx.lineTo(x + 130, ground - 160); ctx.lineTo(x + 180, ground - 160); ctx.lineTo(x + 180, ground - 90); ctx.lineTo(x + 230, ground - 90); ctx.lineTo(x + 230, ground - 130); ctx.lineTo(x + 300, ground - 130); ctx.lineTo(x + 300, ground - 70); ctx.lineTo(x + 380, ground - 70); ctx.lineTo(x + 380, ground - 150); ctx.lineTo(x + 450, ground - 150); ctx.lineTo(x + 450, ground); ctx.closePath(); ctx.fill();
+            let x = offset - scroll; let ground = canvas.height - 20;
+            ctx.beginPath(); ctx.moveTo(x, ground); ctx.lineTo(x, ground-100); ctx.lineTo(x+40, ground-100); ctx.lineTo(x+40, ground-140); ctx.lineTo(x+80, ground-140); ctx.lineTo(x+80, ground-80); ctx.lineTo(x+130, ground-80); ctx.lineTo(x+130, ground-160); ctx.lineTo(x+180, ground-160); ctx.lineTo(x+180, ground-90); ctx.lineTo(x+230, ground-90); ctx.lineTo(x+230, ground-130); ctx.lineTo(x+300, ground-130); ctx.lineTo(x+300, ground-70); ctx.lineTo(x+380, ground-70); ctx.lineTo(x+380, ground-150); ctx.lineTo(x+450, ground-150); ctx.lineTo(x+450, ground); ctx.fill();
         }
         drawCity(0); drawCity(canvas.width);
     }
 
     function drawBird() {
-        if (!gameActive) return; 
-        ctx.save(); 
-        ctx.translate(bird.x, bird.y);
+        if (!gameActive) return;
+        ctx.save(); ctx.translate(bird.x, bird.y);
         ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/4, bird.v * 0.1)));
         ctx.fillStyle = "#f1c40f"; ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.ellipse(0, 0, 18, 13, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(10, -5, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(12, -5, 2, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#e67e22"; ctx.beginPath(); ctx.moveTo(12, 2); ctx.lineTo(25, 7); ctx.lineTo(12, 12); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(0, 0, 18, 13, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(10,-5,6,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle="#000"; ctx.beginPath(); ctx.arc(12,-5,2,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle="#e67e22"; ctx.beginPath(); ctx.moveTo(12,2); ctx.lineTo(25,7); ctx.lineTo(12,12); ctx.fill(); ctx.stroke();
         ctx.restore();
     }
 
     function update() {
         if (!gameActive) return;
-        bird.v += bird.g;
-        bird.y += bird.v;
-        if (frame % 100 === 0) {
-            let gap = 190; 
-            let top = Math.random() * (canvas.height - gap - 250) + 100;
+        bird.v += bird.g; bird.y += bird.v;
+        if (frame % 90 === 0) {
+            let gap = 180; let top = Math.random() * (canvas.height - gap - 250) + 100;
             pipes.push({ x: canvas.width, t: top, b: canvas.height - top - gap, p: false });
         }
         pipes.forEach((p, i) => {
-            p.x -= 3;
+            p.x -= 3.2;
             if (bird.x + 15 > p.x && bird.x - 15 < p.x + pipeWidth) {
-                if (bird.y - 10 < p.t || bird.y + 10 > canvas.height - p.b) {
-                    playSnd(sndHit); endGame();
-                }
+                if (bird.y - 12 < p.t || bird.y + 12 > canvas.height - p.b) { playSnd(sndHit); endGame(); }
             }
-            if (!p.p && bird.x > p.x + pipeWidth) { 
-                score++; p.p = true; scoreHud.innerText = score; playSnd(sndPoint); 
-            }
+            if (!p.p && bird.x > p.x + pipeWidth) { score++; p.p = true; scoreHud.innerText = score; playSnd(sndPoint); }
             if (p.x < -pipeWidth) pipes.splice(i, 1);
         });
         if (bird.y > canvas.height - 20 || bird.y < 0) { playSnd(sndHit); endGame(); }
@@ -225,26 +313,23 @@
         ctx.fillStyle = "#70c5ce"; ctx.fillRect(0,0, canvas.width, canvas.height);
         drawScenery();
         pipes.forEach(p => {
-            ctx.fillStyle = "#73bf2e"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+            ctx.fillStyle = "#73bf2e"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
             ctx.fillRect(p.x, 0, pipeWidth, p.t); ctx.strokeRect(p.x, 0, pipeWidth, p.t);
             ctx.fillRect(p.x, canvas.height - p.b, pipeWidth, p.b); ctx.strokeRect(p.x, canvas.height - p.b, pipeWidth, p.b);
         });
         ctx.fillStyle = "#ded895"; ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-        ctx.strokeStyle = "#000"; ctx.strokeRect(0, canvas.height - 20, canvas.width, 1);
         drawBird();
         if(isReady) frame++;
     }
 
     const control = (e) => { 
-        if(isReady) startGame();
+        if(isReady && game.style.display === 'block') startGame();
         else if(gameActive) { bird.v = bird.j; playSnd(sndWing); }
     };
     window.onmousedown = control;
     window.ontouchstart = (e) => { if(e.target.tagName !== 'BUTTON') { e.preventDefault(); control(); } };
 
-    init();
     function loop() { update(); draw(); requestAnimationFrame(loop); }
-    loop();
 </script>
 </body>
 </html>
